@@ -1,4 +1,8 @@
 <?
+/*
+	TODO: still need to settle on what the frontend will recieve from the aparser class.
+*/
+
 //import depedencies
 require_once("../../../../private/mysql_connect_monstars.php");
 require_once('parser.php');
@@ -40,6 +44,6 @@ else{
 $parser = new parser();
 $json   = $parser->init($name, $type);
 */
-//print_r($json);
+
 
 ?>

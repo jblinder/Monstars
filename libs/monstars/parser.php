@@ -1,6 +1,7 @@
 <?php
 /*
-	Revieves a json obejct of data and a parsing option. Parses the data correctly and retruns a json object of stats	
+	Class: parser.php
+	Notes: 
 */
 
 class parser{
