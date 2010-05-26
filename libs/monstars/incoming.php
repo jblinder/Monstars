@@ -12,10 +12,11 @@ $user   = $_GET['user'];  //user
 $enemy  = $_GET['enemy']; //enemy
 $type   = $_GET['type'];
 
-$parser = new parser();
-$json_user   = $parser->init($user, $type);
-if($enemy) $json_enemy  = $parser->init($enemy, $type);
+$parser	   = new parser();
+$json_user = $parser->init($user, $type);
 
-echo json_encode(array_merge($json_user, $json_enemy));
+if($enemy) $json_matchup  = $parser->init_compare($user, $enemy, $type);
+
+echo json_encode(array_merge($json_user, $json_matchup));
 
 ?>

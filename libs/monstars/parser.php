@@ -6,13 +6,11 @@
 
 class parser{
   
-	private $json;
 	private $user;
-	private $days;
-	private $months;
-
+	private $user_compare;
+	
     public function __construct() {
-		
+
     }
 
 	public function init($_user, $_opt) {
@@ -40,12 +38,42 @@ class parser{
 			case '3': // caclulate twitter followers
 				$followers = $this->getFollowers();
 				return $followers["followers"];
-				break;
-				
-				
+				break;			
 		}
 	}
 	
+	//handles comparing users
+	public function init_compare($_user,$_user_compare, $_opt) {
+		$this->user		 	= $_user;
+		$this->user_compare = $_user_compare;
+		
+		//NEEDS TO BE CODED OUT
+		switch($_opt){
+			case '0':  //get user's stats
+				$scobbles =  0;//floor($this->getScobbles());
+				$time     =  floor($this->getFreq());
+				$follow_info = $this->getFollowers();
+				$followers =  floor($follow_info["followers"]);
+				$profile   =  $follow_info["icon"];
+				$payload = array("user" => $this->user, "scobbles" => $scobbles, "time" => $time, "followers" => $followers, "image" => $profile, "bio" => $follow_info["bio"]);
+				return $payload;
+				break;
+			case '1': // caclulate milliscobles
+				$scobbles = 0; //$this->getScobbles();
+				return $scobbles;
+				break;
+				
+			case '2': // calculate average time in between tweets
+				$freq = $this->getFreq();
+				return $freq;
+				break;
+				
+			case '3': // caclulate twitter followers
+				$followers = $this->getFollowers();
+				return $followers["followers"];
+				break;			
+		}
+	}
 	
 
 	private function query($url) {
@@ -59,25 +87,29 @@ class parser{
 	    
 	    $data =  curl_exec($ch);
 	    curl_close($ch);
+	
 		return $data;
 	
 	}
 	
 	private function getScobbles() {
-		$url  = "http://followcost.com/" . $this->user . ".json";
-		echo $url;
-	 	$data = json_decode($this->query($url));
+		$url 	  = "http://followcost.com/" . $this->user . ".json";
+	 	$data 	  = json_decode($this->query($url));
 		$scobbles = $data->milliscobles_all_time;
+		
 		return $scobbles;
 	}
 	
 	private function getFreq() {
-		$url  = "http://api.twitter.com/1/statuses/user_timeline.json?screen_name=". $this->user ."&count=100";
-		$data = json_decode($this->query($url));
-		$total = 0;
-		for($i = 0; $i < count($data); $i++){
-			
-			$ndate = date('Y-m-d H:i:s', strtotime($data[$i]->created_at));
+		$url    = "http://api.twitter.com/1/statuses/user_timeline.json?screen_name=". $this->user ."&count=100";
+		$data   = json_decode($this->query($url));
+		$total  = 0;
+		$months = [];
+		$days   = [];
+		
+		for($i = 0; $i < count($data); $i++)
+		{	
+			$ndate 	  = date('Y-m-d H:i:s', strtotime($data[$i]->created_at));
 			$tempdate = preg_split('/ /', $ndate);
 			$monthly  = preg_split('/-/', $tempdate[0]);
 			$daily    = preg_split('/:/', $tempdate[1]);
@@ -89,7 +121,8 @@ class parser{
 			$min    = $daily[1];
 			$sec    = $daily[2];
 			
-			if($i >= 1){
+			if($i >= 1)
+			{
 				$secyear   = ( $pyear - $year ) * 31556926;
 				$secmonths = ( $pmonth - $month ) * 2629743.83;
 				$secdays   = ( $pday  -  $day ) *  86400;
@@ -103,18 +136,18 @@ class parser{
 		  		$pday   = $day;
 		  		$phour  = $hour;
 		  		$pmin   = $min;
-		  		$psec   = $sec;
-			
-		}
-		
+		  		$psec   = $sec;	
+		}		
 		$total = floor($total / count($data));
+		
 		return $total;
 	}
 	
 	private function getFollowers() {
-		$url  = "http://api.twitter.com/1/users/show.json?screen_name=" . $this->user;
-		$data = json_decode($this->query($url));
+		$url 	 = "http://api.twitter.com/1/users/show.json?screen_name=" . $this->user;
+		$data 	 = json_decode($this->query($url));
 		$payload = array("followers" =>$data->followers_count, "icon" => $data->profile_image_url, "bio" => $data->description);
+		
 		return $payload;
 	}
 	
