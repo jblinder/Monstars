@@ -1,13 +1,13 @@
 <?php
 // require twitterOAuth lib
-require_once('lib/twitteroauth/twitterOAuth.php');
-
+require_once('libs/twitteroauth/twitterOAuth.php');
+//require_once('libs/monstars/parser.php');
 /* Sessions are used to keep track of tokens while user authenticates with twitter */
 session_start();
 /* Consumer key from twitter */
-$consumer_key = 'zhc4DlMuUsyNb2GrQVDjQ';
+$consumer_key = '';
 /* Consumer Secret from twitter */
-$consumer_secret = 'H1A2xOl3g9Vofr2ySC6ZtenlQ2nWG57hEUhG8Mfs3k';
+$consumer_secret = '';
 /* Set up placeholder */
 $content = NULL;
 /* Set state if previous session */
@@ -20,7 +20,8 @@ $oauth_token = $_REQUEST['oauth_token'];
 $section = $_REQUEST['section'];
 
 /* Clear PHP sessions */
-if ($_REQUEST['test'] === 'clear') {/*{{{*/
+if ($_REQUEST['test'] === 'clear') {
+/*{{{*/
   session_destroy();
   session_start();
 }/*}}}*/
@@ -45,14 +46,13 @@ switch ($state) {/*{{{*/
 
     /* Save tokens for later */
     $_SESSION['oauth_request_token'] = $token = $tok['oauth_token'];
-    $_SESSION['oauth_request_token_secret'] = $tok['oauth_token_secret'];
+    $_SESSION['oauth_request_token_secret']   = $tok['oauth_token_secret'];
     $_SESSION['oauth_state'] = "start";
 
     /* Build the authorization URL */
     $request_link = $to->getAuthorizeURL($token);
 
     /* Build link that gets user to twitter to authorize the app */
-    $content = 'Click on the link to go to twitter to authorize your account.';
     $content .= '<br /><a href="'.$request_link.'">'.$request_link.'</a>';
     break;
   case 'returned':
@@ -74,7 +74,8 @@ switch ($state) {/*{{{*/
     /* Create TwitterOAuth with app key/secret and user access key/secret */
     $to = new TwitterOAuth($consumer_key, $consumer_secret, $_SESSION['oauth_access_token'], $_SESSION['oauth_access_token_secret']);
     /* Run request on twitter API as user. */
-    $content = $to->OAuthRequest('https://twitter.com/account/verify_credentials.xml', array(), 'GET');
+    $content = $to->OAuthRequest('https://twitter.com/account/verify_credentials.json', array(), 'GET');
+
     //$content = $to->OAuthRequest('https://twitter.com/statuses/update.xml', array('status' => 'Test OAuth update. #testoauth'), 'POST');
     //$content = $to->OAuthRequest('https://twitter.com/statuses/replies.xml', array(), 'POST');
     break;
@@ -86,16 +87,24 @@ switch ($state) {/*{{{*/
     <title>Twitter OAuth in PHP</title>
   </head>
   <body>
-    <h2>Welcome to a Twitter OAuth PHP example.</h2>
-    <p>This site is a basic showcase of Twitters new OAuth authentication method. Everything is saved in sessions. If you want to start over <a href='<?php echo $_SERVER['PHP_SELF']; ?>?test=clear'>clear sessions</a>.</p>
-
+	   <a href='<?php echo $_SERVER['PHP_SELF']; ?>?test=clear'>clear sessions link</a>.</p>
+	  
+	  
     <p>
-      Get the code powering this at <a href='http://github.com/abraham/twitteroauth'>http://github.com/abraham/twitteroauth</a>
-      <br />
-      Read the documentation at <a href='https://docs.google.com/View?docID=dcf2dzzs_2339fzbfsf4'>https://docs.google.com/View?docID=dcf2dzzs_2339fzbfsf4</a> 
-    </p>
+			<?php
+				//this section needs to be coded out
+				if($state == 'returned'){
+					$data = json_decode($content);
+					$username = $data->screen_name;
+				
+					echo $username;
+				}
+				else{
+					print_r($content); 
+				}
+				?>
 
-    <p><pre><?php print_r($content); ?><pre></p>
+	</p>
 
   </body>
 </html>
